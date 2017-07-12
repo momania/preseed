@@ -205,10 +205,10 @@ d-i clock-setup/ntp boolean true
 d-i clock-setup/ntp-server string ntp.ubuntu.com
 
 ### Package selection
-tasksel tasksel/first multiselect openssh-server
+tasksel tasksel/first multiselect standard, ubuntu-server
 
 # Individual additional packages to install
-d-i pkgsel/include string vim htop
+d-i pkgsel/include string openssh-server vim htop
 
 ### Boot loader installation
 
