@@ -104,8 +104,10 @@ debconf-set partman-auto-raid/recipe "1 2 0 ext3 /boot ${DISKA}${DISKAP}1#${DISK
 debconf-set grub-installer/bootdev "$DISKA $DISKB";\
 fi;
 
-# lvremove hangs.. weird
-#d-i preseed/late_command string in-target lvremove -f /dev/vg0/dummy
+# This command is run just before the install finishes, and,
+# it will remove the dummy
+# This throws panic in virtualbox on a mac... :/
+# d-i preseed/late_command string in-target lvremove -f /dev/vg0/dummy > /dev/null 2>&1
 
 ## Partitioning using RAID
 # The method should be set to "raid".
