@@ -105,9 +105,11 @@ debconf-set grub-installer/bootdev "$DISKA $DISKB";\
 fi;
 
 # This command is run just before the install finishes, and,
-# it will remove the dummy
-# This throws panic in virtualbox on a mac... :/
-# d-i preseed/late_command string in-target lvremove -f /dev/vg0/dummy > /dev/null 2>&1
+# it will remove the dummy and then resize and reclaim it for root
+d-i preseed/late_command string \
+lvremove -f /dev/vg0/dummy > /dev/null 2>&1;\
+lvresize -l +100%FREE /dev/vg0/root > /dev/null 2>&1;\
+resize2fs /dev/vg0/root > /dev/null 2>&1;
 
 ## Partitioning using RAID
 # The method should be set to "raid".
