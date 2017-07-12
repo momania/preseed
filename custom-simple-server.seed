@@ -1,36 +1,27 @@
 ### Partitioning
 
-# This command is run immediately before the partitioner starts. It may be
-# useful to apply dynamic partitioner preseeding that depends on the state
-# of the disks (which may not be visible when preseed/early_command runs).
-d-i partman/early_command string \
-    USBDEV=$(list-devices usb-partition | sed "s/\(.*\)./\1/");\
-    BOOTDEV=$(list-devices disk | grep -v "$USBDEV" | head -1);\
-    debconf-set partman-auto/disk $BOOTDEV;\
-    debconf-set grub-installer/bootdev $BOOTDEV; \
-    umount /media;
+# This command is run immediately before the partitioner starts.
+d-i preseed/early_command string [ "$(mount | grep /media)" ] && umount /media || echo "no mounted partition found" > /tmp/early.log
 
 d-i partman-auto/method string lvm
 
 d-i partman-lvm/device_remove_lvm boolean true
 d-i partman-md/device_remove_md boolean true
 
-d-i partman-lvm/confirm boolean true
-d-i partman-lvm/confirm_nooverwrite boolean true
-
 d-i partman-auto-lvm/guided_size string max
-
 d-i partman-auto/choose_recipe select atomic
-
 d-i partman/default_filesystem string ext4
 
+# This makes partman automatically repartition without confirmation.
+d-i partman-md/confirm boolean true
+d-i partman-md/confirm_nooverwrite boolean true
+d-i partman-lvm/confirm boolean true
+d-i partman-lvm/confirm_nooverwrite boolean true
 d-i partman-partitioning/confirm_write_new_label boolean true
 d-i partman/choose_partition select finish
 d-i partman/confirm boolean true
 d-i partman/confirm_nooverwrite boolean true
-
-d-i partman-md/confirm boolean true
-
+d-i partman-basicfilesystems/no_mount_point yes
 
 ### Localization
 # Preseeding only locale sets language, country and locale.
