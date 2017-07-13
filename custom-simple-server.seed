@@ -3,25 +3,45 @@
 # This command is run immediately before the partitioner starts.
 d-i preseed/early_command string [ "$(mount | grep /media)" ] && umount /media || echo "no mounted partition found" > /tmp/early.log
 
+d-i partman-auto/disk string /dev/sda
 d-i partman-auto/method string lvm
-
 d-i partman-lvm/device_remove_lvm boolean true
+d-i partman-lvm/device_remove_lvm_span boolean true
 d-i partman-md/device_remove_md boolean true
-
-d-i partman-auto-lvm/guided_size string max
-d-i partman-auto/choose_recipe select atomic
-d-i partman/default_filesystem string ext4
-
-# This makes partman automatically repartition without confirmation.
-d-i partman-md/confirm boolean true
-d-i partman-md/confirm_nooverwrite boolean true
+d-i partman-auto/purge_lvm_from_device boolean true
+d-i partman-auto-lvm/new_vg_name string system
 d-i partman-lvm/confirm boolean true
+d-i partman/alignment string "optimal"
+d-i partman-auto-lvm/guided_size string max
+
+d-i partman-auto/expert_recipe string                         \
+      boot-root ::                                            \
+              128 100 256 ext3                                \
+                      $primary{ }                             \
+                      $bootable{ }                            \
+                      method{ format } format{ }              \
+                      use_filesystem{ } filesystem{ ext3 }    \
+                      mountpoint{ /boot }                     \
+              .                                               \
+              1024 100 4096 linux-swap                        \
+                      $lvmok{ }                               \
+                      lv_name{ swap }                         \
+                      method{ swap } format{ }                \
+              .                                               \
+              4096 100 1000000000 ext4                        \
+                      $lvmok{ }                               \
+                      lv_name{ root }                         \
+                      method{ format } format{ }              \
+                      use_filesystem{ } filesystem{ ext4 }    \
+                      mountpoint{ / }                         \
+              .
+
 d-i partman-lvm/confirm_nooverwrite boolean true
-d-i partman-partitioning/confirm_write_new_label boolean true
+d-i partman/confirm_write_new_label boolean true
 d-i partman/choose_partition select finish
 d-i partman/confirm boolean true
 d-i partman/confirm_nooverwrite boolean true
-d-i partman-basicfilesystems/no_mount_point yes
+
 
 ### Localization
 # Preseeding only locale sets language, country and locale.
@@ -121,3 +141,8 @@ d-i grub-installer/with_other_os boolean true
 
 # Avoid that last message about the install being complete.
 d-i finish-install/reboot_in_progress note
+
+# Force grub graphix mode, so the terminal works too
+d-i preseed/late_command string \
+     in-target sed -i 's/#GRUB_GFXMODE=.*/GRUB_GFXMODE=1024x768/g' /etc/default/grub; \
+     in-target update-grub;
