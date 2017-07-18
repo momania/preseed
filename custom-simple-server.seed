@@ -125,7 +125,7 @@ d-i clock-setup/ntp-server string ntp.ubuntu.com
 tasksel tasksel/first multiselect standard, ubuntu-server
 
 # Individual additional packages to install
-d-i pkgsel/include string openssh-server vim htop
+d-i pkgsel/include string openssh-server vim htop cpu-checker qemu-kvm libvirt-bin virtinst
 
 ### Boot loader installation
 
